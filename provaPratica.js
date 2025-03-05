@@ -19,7 +19,7 @@ class Entity {
 
 class Racket extends Entity {
     constructor() {
-        super(100, 10, canvas.width - 360, canvas.height - 30)
+        super(150, 10, canvas.width - 360, canvas.height - 30)
     }
     draw() {
         ctx.fillStyle = 'white'
@@ -30,7 +30,7 @@ class Racket extends Entity {
 class Ball extends Entity {
     constructor() {
         super(60, 10, canvas.width - 308, canvas.height - 40)
-        this.veloy = 5
+        this.veloy = -5
         this.velox = 5
     }
     draw() {
@@ -43,17 +43,28 @@ class Ball extends Entity {
         if (this.posx + 8 >= canvas.width || this.posx - 8 <= 0) {
             this.velox = -this.velox
         }
-        if (this.posy + 8 >= canvas.height || this.posy - 8 <= 0) {
+        if (this.posy - 8 <= 0) {
             this.veloy = -this.veloy
         }
+
+        if (this.posy + 8 >= canvas.height - 30 &&
+            this.posx >= game.racket.posx &&
+            this.posx <= game.racket.posx + game.racket.sizex) {
+            this.veloy = -this.veloy
+        } else if (this.posy > canvas.width - 20) {
+            this.posx = canvas.width - 308
+            this.posy = canvas.height - 40
+            this.veloy = -5
+        }
+
         this.posx += this.velox
         this.posy += this.veloy
     }
 }
 
 class Obstaule extends Entity {
-    constructor(posx) {
-        super(60, 10, posx = canvas.width - 340, canvas.height - 380)
+    constructor(posx, posy) {
+        super(100, 50, posx, posy)
     }
     draw() {
         ctx.fillStyle = 'red'
@@ -63,13 +74,26 @@ class Obstaule extends Entity {
 
 class Game {
     constructor() {
-        this.obstacles = [this.obstacle = new Obstaule(100), this.obstacle = new Obstaule(400)]
-        // for (i = 0; i <= 5; i++){
-        //     this.obstacles.push(this.obstacle = new Obstaule())
-        // }
+        this.obstacles = []
+        this.createObstacles()
         this.racket = new Racket()
         this.ball = new Ball()
         this.init()
+    }
+    createObstacles() {
+        const rows = 2
+        const cols = 5
+        const obstacleWidth = 100
+        const obstacleHeight = 40
+        const padding = 20
+
+        for (let row = 0; row <= rows; row++) {
+            for (let col = 0; col <= cols; col++) {
+                const posx = col * (obstacleWidth + padding) + 10
+                const posy = row * (obstacleHeight + padding) + 50
+                this.obstacles.push(new Obstaule(posx, posy));
+            }
+        }
     }
 
     init() {
