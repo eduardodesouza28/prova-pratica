@@ -19,7 +19,7 @@ class Entity {
 
 class Racket extends Entity {
     constructor() {
-        super(60, 10, canvas.width - 340, canvas.height - 30)
+        super(100, 10, canvas.width - 360, canvas.height - 30)
     }
     draw() {
         ctx.fillStyle = 'white'
@@ -30,12 +30,24 @@ class Racket extends Entity {
 class Ball extends Entity {
     constructor() {
         super(60, 10, canvas.width - 308, canvas.height - 40)
+        this.veloy = 5
+        this.velox = 5
     }
     draw() {
         ctx.fillStyle = 'white'
         ctx.beginPath();
-        ctx.arc(canvas.width - 308, canvas.height - 40, 8, 0, Math.PI * 2);
+        ctx.arc(this.posx, this.posy, 8, 0, Math.PI * 2);
         ctx.fill();
+    }
+    moveBall() {
+        if (this.posx + 8 >= canvas.width || this.posx - 8 <= 0) {
+            this.velox = -this.velox
+        }
+        if (this.posy + 8 >= canvas.height || this.posy - 8 <= 0) {
+            this.veloy = -this.veloy
+        }
+        this.posx += this.velox
+        this.posy += this.veloy
     }
 }
 
@@ -44,14 +56,14 @@ class Obstaule extends Entity {
         super(60, 10, posx = canvas.width - 340, canvas.height - 380)
     }
     draw() {
-        ctx.fillStyle = 'white'
+        ctx.fillStyle = 'red'
         ctx.fillRect(this.posx, this.posy, this.sizex, this.sizey)
     }
 }
 
 class Game {
     constructor() {
-        this.obstacles = [this.obstacle = new Obstaule(), this.obstacle = new Obstaule(400)]
+        this.obstacles = [this.obstacle = new Obstaule(100), this.obstacle = new Obstaule(400)]
         // for (i = 0; i <= 5; i++){
         //     this.obstacles.push(this.obstacle = new Obstaule())
         // }
@@ -61,11 +73,19 @@ class Game {
     }
 
     init() {
-        document.addEventListener("keypress", (e) => {
+        document.addEventListener("keydown", (e) => {
             if (e.code === "ArrowRight") {
-                this.racket.posx += 10
+
+                if (this.racket.posx + this.racket.sizex < canvas.width) {
+                    this.racket.posx += 10
+                }
             }
-        })
+            if (e.code === "ArrowLeft") {
+                if (this.racket.posx > 0) {
+                    this.racket.posx -= 10
+                }
+            }
+        });
         this.loop()
     }
 
@@ -76,6 +96,7 @@ class Game {
         this.obstacles.forEach(obs => {
             obs.draw()
         });
+        this.ball.moveBall()
         requestAnimationFrame(() => this.loop())
     }
 }
