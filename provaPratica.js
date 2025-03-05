@@ -20,6 +20,8 @@ class Entity {
 class Racket extends Entity {
     constructor() {
         super(150, 10, canvas.width - 360, canvas.height - 30)
+        this.right = false
+        this.left = false
     }
     draw() {
         ctx.fillStyle = 'white'
@@ -35,11 +37,12 @@ class Ball extends Entity {
     }
     draw() {
         ctx.fillStyle = 'white'
-        ctx.beginPath();
-        ctx.arc(this.posx, this.posy, 8, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath()
+        ctx.arc(this.posx, this.posy, 8, 0, Math.PI * 2)
+        ctx.fill()
     }
     moveBall() {
+
         if (this.posx + 8 >= canvas.width || this.posx - 8 <= 0) {
             this.velox = -this.velox
         }
@@ -51,20 +54,28 @@ class Ball extends Entity {
             this.posx >= game.racket.posx &&
             this.posx <= game.racket.posx + game.racket.sizex) {
             this.veloy = -this.veloy
-        } else if (this.posy > canvas.width - 20) {
-            this.posx = canvas.width - 308
-            this.posy = canvas.height - 40
-            this.veloy = -5
+        } else if (this.posy > canvas.height) {
+            this.resetBall()
         }
+
+        // game.checkObstacleCollision()
 
         this.posx += this.velox
         this.posy += this.veloy
     }
+
+    resetBall() {
+        this.posx = canvas.width / 2
+        this.posy = canvas.height - 40
+        this.veloy = -5
+        this.velox = 5
+    }
+
 }
 
 class Obstaule extends Entity {
     constructor(posx, posy) {
-        super(100, 50, posx, posy)
+        super(50, 25, posx, posy)
     }
     draw() {
         ctx.fillStyle = 'red'
@@ -81,46 +92,78 @@ class Game {
         this.init()
     }
     createObstacles() {
-        const rows = 2
-        const cols = 5
+        const rows = 6
+        const cols = 10
         const obstacleWidth = 100
         const obstacleHeight = 40
-        const padding = 20
+        const padding = 5
 
-        for (let row = 0; row <= rows; row++) {
-            for (let col = 0; col <= cols; col++) {
-                const posx = col * (obstacleWidth + padding) + 10
-                const posy = row * (obstacleHeight + padding) + 50
-                this.obstacles.push(new Obstaule(posx, posy));
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const posx = col * (obstacleWidth + padding) + 5
+                const posy = row * (obstacleHeight + padding) + 10
+                this.obstacles.push(new Obstaule(posx, posy))
             }
         }
     }
-
+    checkObstacleCollision() {
+        for (let i = 0; i < this.obstacles.length; i++) {
+            const obs = this.obstacles[i];
+            console.log(obs)
+            if (this.ball.posx + 8 >= obs.posx && this.ball.posx - 8 <= obs.posx + obs.sizex &&
+                this.ball.posy + 8 >= obs.posy && this.ball.posy - 8 <= obs.posy + obs.sizey) {
+                this.obstacles.splice(i, 1)
+                this.ball.veloy = -this.ball.veloy
+                break
+            }
+        }
+    }
+    movimentRacket() {
+        if (this.racket.right) {
+            this.racket.posx += 10
+            if (this.racket.posx + this.racket.sizex > canvas.width) {
+                this.racket.posx = canvas.width - this.racket.sizex
+            }
+        }
+        if (this.racket.left) {
+            this.racket.posx -= 10;
+            if (this.racket.posx < 0) {
+                this.racket.posx = 0
+            }
+        }
+    }
     init() {
         document.addEventListener("keydown", (e) => {
             if (e.code === "ArrowRight") {
-
-                if (this.racket.posx + this.racket.sizex < canvas.width) {
-                    this.racket.posx += 10
-                }
+                this.racket.right = true
             }
             if (e.code === "ArrowLeft") {
-                if (this.racket.posx > 0) {
-                    this.racket.posx -= 10
-                }
+                this.racket.left = true
             }
-        });
+        })
+
+        document.addEventListener("keyup", (e) => {
+            if (e.code === "ArrowRight") {
+                this.racket.right = false
+            }
+            if (e.code === "ArrowLeft") {
+                this.racket.left = false
+            }
+        })
         this.loop()
     }
 
     loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
+        this.ball.moveBall()
+        this.movimentRacket()
         this.racket.draw()
         this.ball.draw()
+        this.checkObstacleCollision()
         this.obstacles.forEach(obs => {
             obs.draw()
         });
-        this.ball.moveBall()
+
         requestAnimationFrame(() => this.loop())
     }
 }

@@ -22,3 +22,22 @@
     <script src="provaPratica.js"></script>
 </body>
 </html>
+
+<!-- obstaclesCollision() {
+    game.obstacles.forEach((obs, index) => { // Adicionado o index aqui
+        if (this.posx + 8 >= obs.posx && this.posx - 8 <= obs.posx + obs.sizex &&
+            this.posy + 8 >= obs.posy && this.posy - 8 <= obs.posy + obs.sizey) {
+            // Remove o obstáculo
+            game.obstacles.splice(index, 1);
+            // Inverte a direção vertical
+            this.veloy = -this.veloy;
+
+            // Ajusta a posição da bola para fora do obstáculo
+            if (this.posy > obs.posy) {
+                this.posy = obs.posy + obs.sizey + 8; // Coloca a bola acima do obstáculo
+            } else {
+                this.posy = obs.posy - 8; // Coloca a bola abaixo do obstáculo
+            }
+        }
+    });
+} -->
